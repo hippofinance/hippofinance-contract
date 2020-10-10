@@ -1,0 +1,105 @@
+{
+	"compiler": {
+		"version": "0.6.12+commit.27d51765"
+	},
+	"language": "Solidity",
+	"output": {
+		"abi": [
+			{
+				"inputs": [],
+				"name": "beforeAll",
+				"outputs": [],
+				"stateMutability": "nonpayable",
+				"type": "function"
+			},
+			{
+				"inputs": [],
+				"name": "checkFailure",
+				"outputs": [],
+				"stateMutability": "nonpayable",
+				"type": "function"
+			},
+			{
+				"inputs": [],
+				"name": "checkSuccess",
+				"outputs": [],
+				"stateMutability": "nonpayable",
+				"type": "function"
+			},
+			{
+				"inputs": [],
+				"name": "checkSuccess2",
+				"outputs": [
+					{
+						"internalType": "bool",
+						"name": "",
+						"type": "bool"
+					}
+				],
+				"stateMutability": "pure",
+				"type": "function"
+			}
+		],
+		"devdoc": {
+			"kind": "dev",
+			"methods": {},
+			"version": 1
+		},
+		"userdoc": {
+			"kind": "user",
+			"methods": {
+				"beforeAll()": {
+					"notice": "'beforeAll' runs before all other tests More special functions are: 'beforeEach', 'beforeAll', 'afterEach' & 'afterAll'"
+				}
+			},
+			"version": 1
+		}
+	},
+	"settings": {
+		"compilationTarget": {
+			"localhost/tests/Timelock_test.sol": "testSuite"
+		},
+		"evmVersion": "istanbul",
+		"libraries": {},
+		"metadata": {
+			"bytecodeHash": "ipfs"
+		},
+		"optimizer": {
+			"enabled": false,
+			"runs": 200
+		},
+		"remappings": []
+	},
+	"sources": {
+		"@openzeppelin/contracts/math/SafeMath.sol": {
+			"keccak256": "0x9a9cf02622cd7a64261b10534fc3260449da25c98c9e96d1b4ae8110a20e5806",
+			"license": "MIT",
+			"urls": [
+				"bzz-raw://2df142592d1dc267d9549049ee3317fa190d2f87eaa565f86ab05ec83f7ab8f5",
+				"dweb:/ipfs/QmSkJtcfWo7c42KnL5hho6GFxK6HRNV91XABx1P7xDtfLV"
+			]
+		},
+		"localhost/contracts/Timelock.sol": {
+			"keccak256": "0x56e324b5a28b9c5ee306de3ad7d1eb00c6083f7ce8d80ec5837189488ac69ab1",
+			"urls": [
+				"bzz-raw://9aa850e6f068d1f177beb4940a5e331abc7eac53bed14dab09c7dcc36cecafa3",
+				"dweb:/ipfs/QmQJ9npWBSHZDbgktv4i745YU47XVVuLTEwFwehYW7he63"
+			]
+		},
+		"localhost/tests/Timelock_test.sol": {
+			"keccak256": "0x5e21888af06e688d9caa7ee957c07aa2c9c6f8a0e93b9126825ec9e360df323a",
+			"urls": [
+				"bzz-raw://f3ef647c7f34659f6960b94af0f2c061cced243769252fe5374f34189ad15741",
+				"dweb:/ipfs/QmXEwpMSomNYiJ1sWQtfmeTvnc4GNXYGK9qYWxSMCUZFhJ"
+			]
+		},
+		"remix_tests.sol": {
+			"keccak256": "0x94c7b1a1b7c5704e53a3c0dd8eb62d865891124034dd9ac0db8668a019ea4676",
+			"urls": [
+				"bzz-raw://6cb39c6789f2645b4dc69c34803ea2cd88e723cf4f34c5f8b74731a633567f97",
+				"dweb:/ipfs/QmPaUdFuUELtN9RrVmVHQFs6njTM9ATpyfyUiuyrNX3JrK"
+			]
+		}
+	},
+	"version": 1
+}
