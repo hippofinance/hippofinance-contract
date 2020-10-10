@@ -55,7 +55,7 @@ contract AngryHippo is ERC20("AngryHippoV2", "aHIPPOv2"), Ownable {
         address _fundAddress,
         uint256 _start_block
     ) public {
-        _mint(msg.sender, 15000 * 1000000000000000000);
+        _mint(_msgSender(), 15000 * 1000000000000000000);
         devAddress = _devAddress;
         fundAddress = _fundAddress;
         rewardPerBlock = 2 * 1000000000000000000;
@@ -146,81 +146,81 @@ contract AngryHippo is ERC20("AngryHippoV2", "aHIPPOv2"), Ownable {
 
 
     // Stake $HIPPO
-    function stake(uint256 amount) public updateStakingReward(msg.sender) {
+    function stake(uint256 amount) public updateStakingReward(_msgSender()) {
         require(isStart, "not started");
         require(0 < amount, ":stake: Fund Error");
         totalStakedAmount = totalStakedAmount.add(amount);
-        staked[msg.sender].stakedHIPPO = staked[msg.sender].stakedHIPPO.add(amount);
-        HippoToken.safeTransferFrom(msg.sender, address(this), amount);
-        staked[msg.sender].lastBlock = block.number;
-        emit Staked(msg.sender, amount, totalStakedAmount);
+        staked[_msgSender()].stakedHIPPO = staked[_msgSender()].stakedHIPPO.add(amount);
+        HippoToken.safeTransferFrom(_msgSender(), address(this), amount);
+        staked[_msgSender()].lastBlock = block.number;
+        emit Staked(_msgSender(), amount, totalStakedAmount);
     }
 
     // Unstake $HIPPO
-    function unstake(uint256 amount) public updateStakingReward(msg.sender) {
+    function unstake(uint256 amount) public updateStakingReward(_msgSender()) {
         require(isStart, "not started");
-        require(amount <= staked[msg.sender].stakedHIPPO, ":unstake: Fund ERROR");
+        require(amount <= staked[_msgSender()].stakedHIPPO, ":unstake: Fund ERROR");
         require(0 < amount, ":unstake: Fund Error 2");
         totalStakedAmount = totalStakedAmount.sub(amount);
-        staked[msg.sender].stakedHIPPO = staked[msg.sender].stakedHIPPO.sub(amount);
-        HippoToken.safeTransfer(msg.sender, amount);
-        staked[msg.sender].lastBlock = block.number;
-        emit Unstaked(msg.sender, amount, totalStakedAmount);
+        staked[_msgSender()].stakedHIPPO = staked[_msgSender()].stakedHIPPO.sub(amount);
+        HippoToken.safeTransfer(_msgSender(), amount);
+        staked[_msgSender()].lastBlock = block.number;
+        emit Unstaked(_msgSender(), amount, totalStakedAmount);
     }
 
     // Claim
-    function sendReward() public updateStakingReward(msg.sender) {
+    function sendReward() public updateStakingReward(_msgSender()) {
         require(isStart, "not started");
-        require(0 < staked[msg.sender].rewards, "More than 0");
-        uint256 reward = staked[msg.sender].rewards;
-        staked[msg.sender].rewards = 0;
+        require(0 < staked[_msgSender()].rewards, "More than 0");
+        uint256 reward = staked[_msgSender()].rewards;
+        staked[_msgSender()].rewards = 0;
         uint256 totalWeight = rateReward.add(rateDevFee).add(rateFund);
         // 75% to User
-        _mint(msg.sender, reward.div(totalWeight).mul(rateReward));
+        _mint(_msgSender(), reward.div(totalWeight).mul(rateReward));
         // 20% to Funding event
         _mint(fundAddress, reward.div(totalWeight).mul(rateFund));
         // 5% to DevFee
         _mint(devAddress, reward.div(totalWeight).mul(rateDevFee));
-        emit Rewards(msg.sender, reward);
+        emit Rewards(_msgSender(), reward);
     }
 
     // Stake $HIPPO/ETH
-    function stakeLP(uint256 amount) public updateStakingRewardLP(msg.sender) {
+    function stakeLP(uint256 amount) public updateStakingRewardLP(_msgSender()) {
         require(isStart, "not started");
         require(0 < amount, ":stakeLP: Fund Error");
         totalStakedAmountLP = totalStakedAmountLP.add(amount);
-        staked[msg.sender].stakedHippoLP = staked[msg.sender].stakedHippoLP.add(amount);
-        HippoLPToken.safeTransferFrom(msg.sender, address(this), amount);
-        staked[msg.sender].lastBlockLP = block.number;
-        emit StakedLP(msg.sender, amount, totalStakedAmount);
+        staked[_msgSender()].stakedHippoLP = staked[_msgSender()].stakedHippoLP.add(amount);
+        HippoLPToken.safeTransferFrom(_msgSender(), address(this), amount);
+        staked[_msgSender()].lastBlockLP = block.number;
+        emit StakedLP(_msgSender(), amount, totalStakedAmount);
     }
 
     // Unstake $HIPPO/ETH
-    function unstakeLP(uint256 amount) public updateStakingRewardLP(msg.sender) {
+    function unstakeLP(uint256 amount) public updateStakingRewardLP(_msgSender()) {
         require(isStart, "not started");
-        require(amount <= staked[msg.sender].stakedHippoLP, ":unstakeLP: Fund ERROR, amount <= stakedHippo");
+        require(amount <= staked[_msgSender()].stakedHippoLP, ":unstakeLP: Fund ERROR, amount <= stakedHippo");
         require(0 < amount, ":unstakeLP: Fund Error 2");
         totalStakedAmountLP = totalStakedAmountLP.sub(amount);
-        staked[msg.sender].stakedHippoLP = staked[msg.sender].stakedHippoLP.sub(amount);
-        HippoLPToken.safeTransfer(msg.sender, amount);
-        staked[msg.sender].lastBlockLP = block.number;
-        emit UnstakedLP(msg.sender, amount, totalStakedAmountLP);
+        staked[_msgSender()].stakedHippoLP = staked[_msgSender()].stakedHippoLP.sub(amount);
+        HippoLPToken.safeTransfer(_msgSender(), amount);
+        staked[_msgSender()].lastBlockLP = block.number;
+        emit UnstakedLP(_msgSender(), amount, totalStakedAmountLP);
     }    
 
     // Claim LP
-    function sendRewardLP() public updateStakingRewardLP(msg.sender) {
+    function sendRewardLP() public updateStakingRewardLP(_msgSender()) {
         require(isStart, "not started");
-        require(0 < staked[msg.sender].rewardsLP, "More than 0");
-        uint256 reward = staked[msg.sender].rewardsLP;
-        staked[msg.sender].rewardsLP = 0;
+        require(0 < staked[_msgSender()].rewardsLP, "More than 0");
+        uint256 reward = staked[_msgSender()].rewardsLP;
+        staked[_msgSender()].rewardsLP = 0;
         uint256 totalWeight = rateReward.add(rateDevFee).add(rateFund);
         // 75% to User
-        _mint(msg.sender, reward.div(totalWeight).mul(rateReward));
+        _mint(_msgSender(), reward.div(totalWeight).mul(rateReward));
         // 20% to Funding event
         _mint(fundAddress, reward.div(totalWeight).mul(rateFund));
         // 5% to DevFee
         _mint(devAddress, reward.div(totalWeight).mul(rateDevFee));
-        emit Rewards(msg.sender, reward);
+        emit Rewards(_msgSender(), reward);
     }
 
     function setStart() public onlyOwner {
