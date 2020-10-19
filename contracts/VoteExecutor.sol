@@ -1,9 +1,9 @@
-pragma solidity 0.6.2;
+pragma solidity 0.6.12;
 pragma experimental ABIEncoderV2;
 
 
-import "@openzeppelin-solidity/contracts/token/ERC20/SafeERC20.sol";
-import "@openzeppelin-solidity/contracts/math/SafeMath.sol";
+import "@openzeppelin/contracts/token/ERC20/SafeERC20.sol";
+import "@openzeppelin/contracts/math/SafeMath.sol";
 
 interface FundInterface {
     
