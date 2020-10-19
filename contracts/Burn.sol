@@ -23,7 +23,7 @@ contract Burn is VoteExecutor {
         dHIPPO = addr_;
     }
 
-    function executeVote() public {
+    function executeVote() override public {
         FundWallet fundContract = FundWallet(fundAddr);
         ERC20 ahpo = ERC20(aHIPPO);
         ERC20 dhpo = ERC20(dHIPPO);

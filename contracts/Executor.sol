@@ -9,7 +9,7 @@ contract VoteExecutor is Ownable {
 
     }
 
-    function executeVote() public {
+    function executeVote() virtual public{
 
     }
 
