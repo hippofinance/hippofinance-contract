@@ -13,12 +13,12 @@ contract HippoVote is Ownable {
     using SafeERC20 for IERC20;
     using SafeMath for uint256;
 
-    address aHippoAddr;
-    address dHippoAddr;
-    address hippoAddr;
-    address fundWalletAddr;
+    address public hippoAddr;
+    address public aHippoAddr;
+    address public dHippoAddr;
+    address public fundWalletAddr;
 
-    uint256 currentSeason;
+    uint256 public currentSeason;
 
     struct Option {
         string title;
@@ -28,10 +28,12 @@ contract HippoVote is Ownable {
         uint256 executeType;
 
     }
-    uint EXECUTE_TYPE_EXECUTOR = 0;
-    uint EXECUTE_TYPE_KEEP = 1;
-    uint EXECUTE_TYPE_BURN = 2;
-    uint EXECUTE_TYPE_DIST = 3;
+
+    // constant
+    uint256 EXECUTE_TYPE_EXECUTOR = 0;
+    uint256 EXECUTE_TYPE_KEEP = 1;
+    uint256 EXECUTE_TYPE_BURN = 2;
+    uint256 EXECUTE_TYPE_DIST = 3;
 
     struct Voted {
         uint256 option;
@@ -80,12 +82,31 @@ contract HippoVote is Ownable {
         require(voteSeasons[currentSeason].voted[msg.sender].amount == 0);
         _;
     }
-    function getOptions(uint256 season, uint256 id) public returns(Option memory){
+
+    constructor(address _hippo, address _aHippo, address _dHippo, address _fundWallet) public {
+        hippoAddr = _hippo;
+        aHippoAddr = _aHippo;
+        dHippoAddr = _dHippo;
+        fundWalletAddr = _fundWallet;
+        currentSeason = 0;
+    }
+
+    function getCurrentSeason() public view returns(uint256 season) {
+        return currentSeason;
+    }
+
+    function getOptions(uint256 season, uint256 id) public view returns(Option memory){
         return voteSeasons[season].options[id];
     }
+    
+    function getVoted(uint256 season, address addr) public view returns(Voted memory){
+        return voteSeasons[season].voted[addr];
+    }
+
     function addOption(string memory _title, address _executor) public onlyRunningVote onlyOwner {
         _addOptionInternal(_title, _executor, EXECUTE_TYPE_EXECUTOR);
     }
+
     function _addOptionInternal(string memory _title, address _executor, uint256 _executeType) internal onlyRunningVote {
         Option memory _option = Option(_title, msg.sender, _executor, 0, _executeType);
         VoteSeason storage season = voteSeasons[currentSeason];
@@ -160,7 +181,7 @@ contract HippoVote is Ownable {
         }
         executeOption(voteSeasons[currentSeason].options[maxVoteId]);
     }
-    function executeOption(Option memory _option) private {
+    function executeOption(Option memory _option) internal onlyOwner {
         uint executeType = _option.executeType;
         if(executeType == EXECUTE_TYPE_EXECUTOR) {
             voteSeasons[currentSeason].isCustomer = true;
@@ -210,6 +231,27 @@ contract HippoVote is Ownable {
         fundContract.fund(dHippoAddr, msg.sender, dhippo);
         voteSeasons[season].voted[msg.sender].isGetReward = true;
     }
+
+
+    function executeTransaction(address target, uint value, string memory signature, bytes memory data, uint eta) public onlyOwner payable returns (bytes memory) {
+
+        bytes32 txHash = keccak256(abi.encode(target, value, signature, data, eta));
+
+        bytes memory callData;
+
+        if (bytes(signature).length == 0) {
+            callData = data;
+        } else {
+            callData = abi.encodePacked(bytes4(keccak256(bytes(signature))), data);
+        }
+
+        // solium-disable-next-line security/no-call-value
+        (bool success, bytes memory returnData) = target.call.value(value)(callData);
+        require(success, "Transaction execution reverted.");
+
+        return returnData;
+    }
+
 
 }
 

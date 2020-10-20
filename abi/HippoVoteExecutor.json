@@ -1,0 +1,130 @@
+[
+    {
+        "inputs": [
+            {
+                "internalType": "address",
+                "name": "_fundAddr",
+                "type": "address"
+            }
+        ],
+        "name": "setFundAddress",
+        "outputs": [],
+        "stateMutability": "nonpayable",
+        "type": "function"
+    },
+    {
+        "inputs": [
+            {
+                "internalType": "address",
+                "name": "_voteAddr",
+                "type": "address"
+            }
+        ],
+        "name": "setVoteAddress",
+        "outputs": [],
+        "stateMutability": "nonpayable",
+        "type": "function"
+    },
+    {
+        "inputs": [
+            {
+                "internalType": "address",
+                "name": "_hippoAddr",
+                "type": "address"
+            }
+        ],
+        "name": "setHippoAddress",
+        "outputs": [],
+        "stateMutability": "nonpayable",
+        "type": "function"
+    },
+    {
+        "inputs": [
+            {
+                "internalType": "address",
+                "name": "_ahippoAddr",
+                "type": "address"
+            }
+        ],
+        "name": "setaHippoAddress",
+        "outputs": [],
+        "stateMutability": "nonpayable",
+        "type": "function"
+    },
+    {
+        "inputs": [
+            {
+                "internalType": "address",
+                "name": "_dhippoAddr",
+                "type": "address"
+            }
+        ],
+        "name": "setdHippoAddress",
+        "outputs": [],
+        "stateMutability": "nonpayable",
+        "type": "function"
+    },
+    {
+        "inputs": [
+            {
+                "internalType": "string",
+                "name": "functionType",
+                "type": "string"
+            },
+            {
+                "internalType": "string",
+                "name": "functionName",
+                "type": "string"
+            },
+            {
+                "internalType": "address[]",
+                "name": "pAddr",
+                "type": "address[]"
+            },
+            {
+                "internalType": "uint256[]",
+                "name": "pInt",
+                "type": "uint256[]"
+            },
+            {
+                "internalType": "string[]",
+                "name": "pStr",
+                "type": "string[]"
+            },
+            {
+                "internalType": "bytes32[]",
+                "name": "pBytes",
+                "type": "bytes32[]"
+            }
+        ],
+        "name": "executeVote",
+        "outputs": [],
+        "stateMutability": "nonpayable",
+        "type": "function"
+    },
+    {
+        "inputs": [
+            {
+                "internalType": "string",
+                "name": "pStr",
+                "type": "string"
+            },
+            {
+                "internalType": "bytes32",
+                "name": "pBytes",
+                "type": "bytes32"
+            }
+        ],
+        "name": "_testCall",
+        "outputs": [],
+        "stateMutability": "pure",
+        "type": "function"
+    },
+    {
+        "inputs": [],
+        "name": "_executeIERC20",
+        "outputs": [],
+        "stateMutability": "nonpayable",
+        "type": "function"
+    }
+]
