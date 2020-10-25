@@ -26,7 +26,6 @@ contract HippoVote is Ownable {
         address voteExecutor;
         uint256 countOfVote;
         uint256 executeType;
-
     }
 
     // constant
@@ -39,6 +38,7 @@ contract HippoVote is Ownable {
         uint256 option;
         uint256 amount;
         bool isGetReward;
+        uint256 vote;
     }
 
     struct VoteSeason {
@@ -62,24 +62,25 @@ contract HippoVote is Ownable {
     mapping (uint256 => VoteSeason) public voteSeasons;
 
     modifier onlyCurrentSeason (uint256 season) {
-        require(currentSeason == season);
+        require(currentSeason == season, "onlyCurrentSeason");
         _;
     }
     modifier onlyRunningVote () {
-        require(voteSeasons[currentSeason].endBlock <= block.number);
+        require(voteSeasons[currentSeason].startBlock <= block.number, "onlyRunningVote: Not Started");
+        require(block.number <= voteSeasons[currentSeason].endBlock, "onlyRunningVote: Started");
         _;
     }
     modifier onlyEndVote () {
-        require(block.number < voteSeasons[currentSeason].endBlock);
+        require(voteSeasons[currentSeason].endBlock < block.number, "onlyEndVote");
         _;
     }
     modifier onlyVoteMember () {
-        require(voteSeasons[currentSeason].voted[msg.sender].amount != 0);
+        require(voteSeasons[currentSeason].voted[msg.sender].amount != 0, "onlyVoteMember");
         _;
 
     }
     modifier onlyNotVoteMember () {
-        require(voteSeasons[currentSeason].voted[msg.sender].amount == 0);
+        require(voteSeasons[currentSeason].voted[msg.sender].amount == 0, "You can vote only 1 option.");
         _;
     }
 
@@ -103,16 +104,15 @@ contract HippoVote is Ownable {
         return voteSeasons[season].voted[addr];
     }
 
-    function addOption(string memory _title, address _executor) public onlyRunningVote onlyOwner {
+    function addOption(string memory _title, address _executor) public onlyOwner {
         _addOptionInternal(_title, _executor, EXECUTE_TYPE_EXECUTOR);
     }
 
-    function _addOptionInternal(string memory _title, address _executor, uint256 _executeType) internal onlyRunningVote {
+    function _addOptionInternal(string memory _title, address _executor, uint256 _executeType) internal onlyOwner {
+        // title, suggester, executor, countOfVote, executeType
         Option memory _option = Option(_title, msg.sender, _executor, 0, _executeType);
-        VoteSeason storage season = voteSeasons[currentSeason];
-        season.options[season.optionSize] = _option;
-        season.optionSize = season.optionSize.add(1);
-
+        voteSeasons[currentSeason].options[voteSeasons[currentSeason].optionSize] = _option;
+        voteSeasons[currentSeason].optionSize = voteSeasons[currentSeason].optionSize.add(1);
     }
 
     function newSeason(uint256 startBlock, uint256 endBlock) public onlyOwner {
@@ -133,28 +133,28 @@ contract HippoVote is Ownable {
     }
 
     function addDefaultOptions() public onlyOwner{
-        addOption("do nothing", address(0));
-        _addOptionInternal("burn all tokens", address(0), EXECUTE_TYPE_BURN);
-        _addOptionInternal("distribute all tokens", address(0), EXECUTE_TYPE_DIST);
+        addDoNothingOption();
+        addBurnOption();
+        addDistOption();
     }
 
     function addDoNothingOption() public onlyOwner{
-        addOption("do nothing", address(0));
+        _addOptionInternal("Do nothing", address(0), EXECUTE_TYPE_KEEP);
     }
 
     function addBurnOption() public onlyOwner{
-        _addOptionInternal("burn all tokens", address(0), EXECUTE_TYPE_BURN);
+        _addOptionInternal("Burn all tokens", address(0), EXECUTE_TYPE_BURN);
     }
 
     function addDistOption() public onlyOwner{
-        _addOptionInternal("distribute all tokens", address(0), EXECUTE_TYPE_DIST);
+        _addOptionInternal("Distribute all tokens", address(0), EXECUTE_TYPE_DIST);
     }
 
-    function stake(uint256 optionId, uint256 amount) public onlyRunningVote onlyNotVoteMember{
-        require(IERC20(hippoAddr).allowance(address(this), msg.sender) >= amount, "not approved");
+    function stake(uint256 optionId, uint256 amount) public onlyRunningVote onlyNotVoteMember {
         IERC20(hippoAddr).transferFrom(msg.sender, address(this), amount);
         voteSeasons[currentSeason].voted[msg.sender].option = optionId;
         voteSeasons[currentSeason].voted[msg.sender].amount = amount;
+        voteSeasons[currentSeason].voted[msg.sender].vote = amount;
         voteSeasons[currentSeason].voted[msg.sender].isGetReward = false;
         voteSeasons[currentSeason].options[optionId].countOfVote = voteSeasons[currentSeason].options[optionId].countOfVote.add(amount);
         voteSeasons[currentSeason].totalVoted = voteSeasons[currentSeason].totalVoted.add(amount);
@@ -165,8 +165,11 @@ contract HippoVote is Ownable {
         IERC20(hippoAddr).transfer(msg.sender, amount);
         voteSeasons[seasonId].voted[msg.sender].amount = 0;
         uint256 optionId = voteSeasons[seasonId].voted[msg.sender].option;
-        if(seasonId == currentSeason) {
+        // If running
+        if(voteSeasons[seasonId].startBlock <= block.number && block.number <= voteSeasons[seasonId].endBlock) {
+            voteSeasons[seasonId].totalVoted = voteSeasons[seasonId].totalVoted.sub(amount);
             voteSeasons[seasonId].options[optionId].countOfVote = voteSeasons[seasonId].options[optionId].countOfVote.sub(amount);
+            voteSeasons[seasonId].voted[msg.sender].vote = 0;
         }
     }
 
@@ -186,10 +189,11 @@ contract HippoVote is Ownable {
         if(executeType == EXECUTE_TYPE_EXECUTOR) {
             voteSeasons[currentSeason].isCustomer = true;
             VoteExecutor(_option.voteExecutor).executeVote();
+            return;
         }
         if(executeType == EXECUTE_TYPE_KEEP) { 
             voteSeasons[currentSeason].isKeep = true;
-            // do nothing
+            return;
         }
         if(executeType == EXECUTE_TYPE_BURN) { 
             voteSeasons[currentSeason].isBurn = true;
@@ -197,26 +201,34 @@ contract HippoVote is Ownable {
             ERC20 ahpo = ERC20(aHippoAddr);
             ERC20 dhpo = ERC20(dHippoAddr);
             uint256 aHippoBalance = ahpo.balanceOf(fundWalletAddr);
-            fundContract.fund(aHippoAddr, address(0), voteSeasons[currentSeason].aBalance);
+            fundContract.fund(aHippoAddr, address(0x000000000000000000000000000000000000dEaD), voteSeasons[currentSeason].aBalance);
             uint256 dHippoBalance = dhpo.balanceOf(fundWalletAddr);
-            fundContract.fund(dHippoAddr, address(0), voteSeasons[currentSeason].dBalance);
+            fundContract.fund(dHippoAddr, address(0x000000000000000000000000000000000000dEaD), voteSeasons[currentSeason].dBalance);
+            return;
         }
         if(executeType == EXECUTE_TYPE_DIST) {
             voteSeasons[currentSeason].isDistribute = true;
+            return;
         }
     }
     
     function calcRewardAngryHippo(uint256 seasonId, address addr) public view returns(uint256) {
         uint256 totalVoteAmount = voteSeasons[currentSeason].totalVoted;
-        uint256 myVoted = voteSeasons[currentSeason].voted[addr].amount;
+        uint256 myVoted = voteSeasons[currentSeason].voted[addr].vote;
         uint256 reward_ahpo = voteSeasons[currentSeason].aBalance.mul(myVoted).div(totalVoteAmount);
+        if(voteSeasons[currentSeason].voted[msg.sender].isGetReward) {
+            return 0;
+        }
         return reward_ahpo;
     }
 
     function calcRewardDarkHippo(uint256 seasonId, address addr) public view returns(uint256) {
         uint256 totalVoteAmount = voteSeasons[currentSeason].totalVoted;
-        uint256 myVoted = voteSeasons[currentSeason].voted[addr].amount;
+        uint256 myVoted = voteSeasons[currentSeason].voted[addr].vote;
         uint256 reward_dhpo = voteSeasons[currentSeason].dBalance.mul(myVoted).div(totalVoteAmount);
+        if(voteSeasons[currentSeason].voted[msg.sender].isGetReward) {
+            return 0;
+        }
         return reward_dhpo;
     }
 

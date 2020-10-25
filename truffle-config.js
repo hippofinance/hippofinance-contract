@@ -27,6 +27,7 @@ module.exports = {
       provider: function () {
         return new HDWalletProvider(process.env.DEVMNEMONIC, "https://goerli.infura.io/v3/83301e4b4e234662b7769295c0f4a2e1", accountIndex)
       },
+      gasLimit: 100000000,
       gasPrice: 50000000000
     },
     main: {
@@ -43,7 +44,7 @@ module.exports = {
       settings: {
         optimizer: {
           enabled: true, // Default: false
-          runs: 999999     // Default: 200
+          runs: 9999999     // Default: 200
         },
         evmVersion: "istanbul"  // Default: "byzantium"
       }
